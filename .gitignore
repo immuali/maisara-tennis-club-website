@@ -1,0 +1,12 @@
+# Sensitive keys and Ansible inventory
+*.pem
+inventory.ini
+
+# Local/editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+*.tmp
