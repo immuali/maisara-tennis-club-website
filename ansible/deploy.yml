@@ -1,0 +1,53 @@
+---
+- name: Deploy Maisara Tennis Club website
+  hosts: webserver
+  become: true
+
+  vars:
+    repository_url: "https://github.com/immuali/maisara-tennis-club-website.git"
+    repository_directory: "/tmp/maisara-tennis-club-website"
+    website_directory: "/usr/share/nginx/html/maisara"
+
+  tasks:
+    - name: Install Nginx and Git
+      ansible.builtin.dnf:
+        name:
+          - nginx
+          - git
+        state: present
+
+    - name: Start and enable Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Download latest website version from GitHub
+      ansible.builtin.git:
+        repo: "{{ repository_url }}"
+        dest: "{{ repository_directory }}"
+        version: main
+        update: true
+        force: true
+
+    - name: Create Maisara website directory
+      ansible.builtin.file:
+        path: "{{ website_directory }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy website files to Nginx
+      ansible.builtin.copy:
+        src: "{{ repository_directory }}/"
+        dest: "{{ website_directory }}/"
+        remote_src: true
+        owner: root
+        group: root
+        directory_mode: "0755"
+
+    - name: Verify Maisara website
+      ansible.builtin.uri:
+        url: "http://localhost/maisara/"
+        status_code: 200
